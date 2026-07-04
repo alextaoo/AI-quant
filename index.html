@@ -961,9 +961,9 @@ function analyzeMA(data, maP) {
   };
 }
 
-function analyzeMACD(data, fast, slow, signal) {
+function analyzeMACD(data, fast, slow, sig) {
   if (!data.length) return null;
-  const { dif, dea, bar } = macd(data, fast, slow, signal);
+  const { dif, dea, bar } = macd(data, fast, slow, sig);
   
   // 找最后一个有效值
   let lastDif = null, lastDea = null, lastBar = null;
