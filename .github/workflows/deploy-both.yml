@@ -1,1 +1,132 @@
+name: Deploy Both Branches to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Determine branch and target dir
+        id: vars
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "dir=" >> $GITHUB_OUTPUT
+            echo "branch=main" >> $GITHUB_OUTPUT
+          else
+            echo "dir=master" >> $GITHUB_OUTPUT
+            echo "branch=master" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: gh-pages
+          destination_dir: ${{ steps.vars.outputs.dir }}
+          allow_empty_commit: true
+          force_orphan: false
+
+  landing-page:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Create landing page
+        run: |
+          cat > index.html << 'LANDING'
+          <!DOCTYPE html>
+          <html lang="zh">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>AI-quant - 版本选择</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              .container {
+                text-align: center;
+                padding: 2rem;
+              }
+              h1 { color: #fff; font-size: 2.5rem; margin-bottom: 0.5rem; }
+              p { color: #a0a0c0; margin-bottom: 2.5rem; font-size: 1.1rem; }
+              .cards {
+                display: flex;
+                gap: 1.5rem;
+                justify-content: center;
+                flex-wrap: wrap;
+              }
+              .card {
+                background: rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 16px;
+                padding: 2rem 2.5rem;
+                min-width: 220px;
+                text-decoration: none;
+                transition: all 0.3s;
+                color: #fff;
+              }
+              .card:hover {
+                background: rgba(255,255,255,0.15);
+                transform: translateY(-4px);
+                box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+              }
+              .card-icon { font-size: 3rem; margin-bottom: 1rem; }
+              .card h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+              .card p { color: #9090b0; font-size: 0.9rem; margin: 0; }
+              .badge {
+                display: inline-block;
+                padding: 0.2rem 0.7rem;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                margin-top: 0.5rem;
+              }
+              .badge-main { background: #238636; }
+              .badge-master { background: #6e40c9; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>🤖 AI-quant</h1>
+              <p>请选择要查看的版本</p>
+              <div class="cards">
+                <a href="./" class="card">
+                  <div class="card-icon">🚀</div>
+                  <h2>主站 (main)</h2>
+                  <p>最新开发版本</p>
+                  <span class="badge badge-main">main</span>
+                </a>
+                <a href="./master/" class="card">
+                  <div class="card-icon">⚙️</div>
+                  <h2>生产版 (master)</h2>
+                  <p>稳定发布版本</p>
+                  <span class="badge badge-master">master</span>
+                </a>
+              </div>
+            </div>
+          </body>
+          </html>
+          LANDING
+
+      - name: Deploy landing page
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: gh-pages
 
