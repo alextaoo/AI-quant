@@ -80,8 +80,8 @@
 
     /* ── Main ── */
     #main{display:flex;flex:1;overflow:hidden;}
-    #chart-area{flex:1;display:flex;flex-direction:column;min-width:0;}
-    #chart{flex:1;min-height:0;}
+    #chart-area{flex:1;display:flex;flex-direction:column;min-width:0;overflow-y:auto;overflow-x:hidden;}
+    #chart{min-height:970px;flex-shrink:0;}
 
     /* ── Panel ── */
     #panel-resize{width:4px;cursor:col-resize;background:transparent;transition:background .15s;flex-shrink:0;}
@@ -660,39 +660,39 @@ function buildOpt(){
   const hasRsi = S.rsiOn;
   const subCount = (hasMacd?1:0) + (hasKdj||hasRsi?1:0);
   
-  // 布局配置：主图55% + 成交量12% + 子指标区域
-  // 子指标区域动态分配：MACD占14%，KDJ/RSI合并占13%
-  const mainHeight = 55;
-  const volHeight = 12;
-  const gap = 2; // 子图之间的间隙百分比
+  // 布局配置：固定像素高度
+  const gap = 20; // 子图之间的间隙(像素)
+  const mainHeight = 480;
+  const volHeight = 140;
+  const macdHeight = 170;
+  const kdjRsiHeight = 160;
   
-  let macdHeight = 0, kdjRsiHeight = 0;
-  if(subCount === 1) {
-    macdHeight = hasMacd ? 18 : 0;
-    kdjRsiHeight = (hasKdj||hasRsi) ? 18 : 0;
-  } else if(subCount === 2) {
-    macdHeight = 14;
-    kdjRsiHeight = 13;
-  }
+  // 计算总高度并动态设置容器高度
+  let totalHeight = mainHeight + volHeight + gap * 2; // 主图 + 成交量 + 2个间隙
+  if(hasMacd) totalHeight += macdHeight + gap;
+  if(hasKdj || hasRsi) totalHeight += kdjRsiHeight + gap;
   
-  // 计算各区域位置 (从上到下)
-  let currentTop = 4; // 顶部留白
+  // 动态设置图表容器高度
+  const chartEl = document.getElementById('chart');
+  if(chartEl) chartEl.style.height = totalHeight + 'px';
+  
+  // 计算各区域位置 (从上到下，使用像素)
+  let currentTop = 10; // 顶部留白
   const grids=[
-    {l:'6%',r:'2%',t:currentTop+'%',h:mainHeight+'%',gi:0}  // 主图: K线+MA
+    {l:'60',r:'20',t:currentTop+'px',h:mainHeight+'px',gi:0}  // 主图: K线+MA
   ];
   currentTop += mainHeight + gap;
   
-  grids.push({l:'6%',r:'2%',t:currentTop+'%',h:volHeight+'%',gi:1}); // 成交量
+  grids.push({l:'60',r:'20',t:currentTop+'px',h:volHeight+'px',gi:1}); // 成交量
   currentTop += volHeight + gap;
   
   let gi = 2;
   if(hasMacd){
-    grids.push({l:'6%',r:'2%',t:currentTop+'%',h:macdHeight+'%',gi:gi++});
+    grids.push({l:'60',r:'20',t:currentTop+'px',h:macdHeight+'px',gi:gi++});
     currentTop += macdHeight + gap;
   }
   if(hasKdj||hasRsi){
-    // KDJ和RSI合并到一个grid，左右分栏
-    grids.push({l:'6%',r:'2%',t:currentTop+'%',h:kdjRsiHeight+'%',gi:gi++});
+    grids.push({l:'60',r:'20',t:currentTop+'px',h:kdjRsiHeight+'px',gi:gi++});
   }
 
   // xAxis: all share the same dates
