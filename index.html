@@ -219,6 +219,49 @@
     #loading.on{display:flex;}
     .sp{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;}
     @keyframes sp{to{transform:rotate(360deg);}}
+
+    /* ── Chart Legend ── */
+    #chart-legend{
+      display:flex;align-items:center;gap:12px;padding:4px 12px;
+      background:var(--surface);border-bottom:1px solid var(--border);
+      font-size:10px;flex-wrap:wrap;flex-shrink:0;
+    }
+    .leg-group{display:flex;align-items:center;gap:6px;}
+    .leg-title{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.5px;}
+    .leg-item{display:flex;align-items:center;gap:3px;cursor:default;}
+    .leg-dot{width:8px;height:2px;border-radius:1px;}
+    .leg-dot.cir{width:6px;height:6px;border-radius:50%;}
+    .leg-txt{color:var(--text);}
+
+    /* ── 指标解读 ── */
+    #analysis-content{padding:4px 0;}
+    .analysis-card{
+      background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:6px;
+      transition:border-color .15s;
+    }
+    .analysis-card:hover{border-color:var(--accent);}
+    .ac-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+    .ac-name{font-size:12px;font-weight:600;}
+    .ac-signal{
+      font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;
+    }
+    .ac-signal.buy{background:rgba(63,185,80,.18);color:var(--green);}
+    .ac-signal.sell{background:rgba(248,81,73,.18);color:var(--red);}
+    .ac-signal.hold{background:rgba(210,153,34,.18);color:var(--yellow);}
+    .ac-detail{font-size:11px;color:var(--muted);line-height:1.5;}
+    .ac-row{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:11px;}
+    .ac-val{font-weight:600;}
+    .ac-val.up{color:var(--green);}
+    .ac-val.dn{color:var(--red);}
+    .analysis-summary{
+      background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-top:6px;
+    }
+    .as-hd{font-size:11px;font-weight:600;margin-bottom:4px;}
+    .as-body{font-size:11px;color:var(--muted);line-height:1.5;}
+    .as-score{display:flex;align-items:center;gap:8px;margin-top:5px;}
+    .score-bar{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden;}
+    .score-fill{height:100%;border-radius:3px;transition:width .3s;}
+    .score-num{font-size:12px;font-weight:700;min-width:28px;text-align:right;}
   </style>
 </head>
 <body>
@@ -280,6 +323,30 @@
   <!-- Main -->
   <div id="main">
     <div id="chart-area">
+      <!-- Chart Legend -->
+      <div id="chart-legend">
+        <div class="leg-group" id="leg-ma" style="display:none">
+          <span class="leg-title">MA</span>
+          <span id="leg-ma-items"></span>
+        </div>
+        <div class="leg-group" id="leg-macd" style="display:none">
+          <span class="leg-title">MACD</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#4dabf7"></span><span class="leg-txt">DIF</span></span>
+          <span class="leg-item"><span class="leg-dot" style="background:var(--yellow)"></span><span class="leg-txt">DEA</span></span>
+          <span class="leg-item"><span class="leg-dot cir" style="background:var(--green)"></span><span class="leg-txt">BAR+</span></span>
+          <span class="leg-item"><span class="leg-dot cir" style="background:var(--red)"></span><span class="leg-txt">BAR-</span></span>
+        </div>
+        <div class="leg-group" id="leg-kdj" style="display:none">
+          <span class="leg-title">KDJ</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#ff6b6b"></span><span class="leg-txt">K</span></span>
+          <span class="leg-item"><span class="leg-dot" style="background:#4dabf7"></span><span class="leg-txt">D</span></span>
+          <span class="leg-item"><span class="leg-dot" style="background:#da77f2"></span><span class="leg-txt">J</span></span>
+        </div>
+        <div class="leg-group" id="leg-rsi" style="display:none">
+          <span class="leg-title">RSI</span>
+          <span id="leg-rsi-items"></span>
+        </div>
+      </div>
       <div id="chart"></div>
       <div id="loading"><div class="sp"></div><span style="color:var(--muted);font-size:12px">加载数据中…</span></div>
     </div>
@@ -356,12 +423,12 @@
       <div class="psec" id="sec-kdj">
         <div class="psec-hd">
           <div class="tog">
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 5L4 2L7 5" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 3L4 6L7 3" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg>
           </div>
           <span class="iname">KDJ 随机指标</span>
         </div>
         <div class="pbody">
-          <label class="ck"><input type="checkbox" id="kdj-on" checked><div class="ck-box"></div><span class="ck-lbl">显示 KDJ</span></label>
+          <label class="ck"><input type="checkbox" id="kdj-on"><div class="ck-box"></div><span class="ck-lbl">显示 KDJ</span></label>
           <div class="srow" style="margin-top:5px">
             <span class="slbl">N</span>
             <input type="number" class="num" id="kdj-n" value="9" min="2" max="90">
@@ -385,12 +452,12 @@
       <div class="psec" id="sec-rsi">
         <div class="psec-hd">
           <div class="tog">
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 5L4 2L7 5" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 3L4 6L7 3" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg>
           </div>
           <span class="iname">RSI 相对强弱</span>
         </div>
         <div class="pbody">
-          <label class="ck"><input type="checkbox" id="rsi-on" checked><div class="ck-box"></div><span class="ck-lbl">显示 RSI</span></label>
+          <label class="ck"><input type="checkbox" id="rsi-on"><div class="ck-box"></div><span class="ck-lbl">显示 RSI</span></label>
           <div class="chips" id="rsi-c" style="margin-top:5px">
             <div class="chip on" data-p="6">RSI6</div>
             <div class="chip on" data-p="12">RSI12</div>
@@ -404,6 +471,19 @@
             <span class="slbl">超卖线</span>
             <input type="number" class="num" id="rsi-os" value="30" min="5" max="50">
           </div>
+        </div>
+      </div>
+
+      <!-- 指标解读 -->
+      <div class="psec" id="sec-analysis">
+        <div class="psec-hd">
+          <div class="tog">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 5L4 2L7 5" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <span class="iname">📊 指标解读</span>
+        </div>
+        <div class="pbody" id="analysis-body">
+          <div id="analysis-content"></div>
         </div>
       </div>
 
@@ -433,25 +513,22 @@
   <div id="toast"></div>
 </div>
 
+<script src="sample_data.js"></script>
 <script>
 /* ================================================================
    StockChart Pro — Main Script
    ================================================================ */
 
-// ── Builtin data (loaded once, reused) ──
-const STOCK_FILES = {
-  s1: { path:'688981_SH_CN_A_ohlcv__.csv', label:'中芯国际 (688981.SH) A股' },
-  s2: { path:'002594_SZ_CN_A_ohlcv__.csv', label:'比亚迪 (002594.SZ) A股' },
-  s3: { path:'600900_SH_CN_A_ohlcv__.csv', label:'长江电力 (600900.SH) A股' },
+// ── Sample data key map (maps dropdown key -> SAMPLE_DATA key) ──
+const SAMPLE_KEY_MAP = { s1:'688981.SH', s2:'002594.SZ', s3:'600900.SH' };
+
+const STOCK_PRESETS = {
+  s1: { label:'中芯国际 (688981.SH) A股' },
+  s2: { label:'比亚迪 (002594.SZ) A股' },
+  s3: { label:'长江电力 (600900.SH) A股' },
 };
 
-const STOCK_PATHS = {
-  s1:'C:\\Users\\11425\\.qclaw\\workspace\\data\\normalized\\688981_SH_CN_A_ohlcv__.csv',
-  s2:'C:\\Users\\11425\\.qclaw\\workspace\\data\\normalized\\002594_SZ_CN_A_ohlcv__.csv',
-  s3:'C:\\Users\\11425\\.qclaw\\workspace\\data\\normalized\\600900_SH_CN_A_ohlcv__.csv',
-};
-
-const MEM = {};  // filePath -> parsed rows
+const MEM = {};  // key -> parsed rows
 
 // ── State ──
 const S = {
@@ -462,10 +539,10 @@ const S = {
   maOn:true, maP:[5,10,20,60], maLW:1.5,
   // MACD
   macdOn:true, macdBarOn:true, macdF:12, macdS:26, macdD:9,
-  // KDJ
-  kdjOn:true, kdjN:9, kdjM1:3, kdjM2:3,
-  // RSI
-  rsiOn:true, rsiP:[6,12,24], rsiOB:70, rsiOS:30,
+  // KDJ (默认关闭)
+  kdjOn:false, kdjN:9, kdjM1:3, kdjM2:3,
+  // RSI (默认关闭)
+  rsiOn:false, rsiP:[6,12,24], rsiOB:70, rsiOS:30,
 };
 
 const MACOLORS=['#ff6b6b','#ffd43b','#69db7c','#4dabf7','#da77f2','#f06595'];
@@ -577,30 +654,81 @@ function buildOpt(){
   const vols=d.map(r=>r.volume);
   const upFlg=d.map(r=>r.close>=r.open);
 
-  // Grids: 0=candle+MA, 1=vol, 2+=sub-indicators
-  const grids=[{l:'8%',r:'3%',t:'7%',h:'38%',gi:0},{l:'8%',r:'3%',t:'49%',h:'11%',gi:1}];
-  let gi=2;
-  if(S.macdOn)grids.push({l:'8%',r:'3%',t:grids[grids.length-1].t,h:'11%',gi:gi++});
-  if(S.kdjOn) grids.push({l:'8%',r:'3%',t:grids[grids.length-1].t,h:'11%',gi:gi++});
-  if(S.rsiOn) grids.push({l:'8%',r:'3%',t:grids[grids.length-1].t,h:'11%',gi:gi++});
+  // 计算需要多少个子图区域
+  const hasMacd = S.macdOn;
+  const hasKdj = S.kdjOn;
+  const hasRsi = S.rsiOn;
+  const subCount = (hasMacd?1:0) + (hasKdj||hasRsi?1:0);
+  
+  // 布局配置：主图55% + 成交量12% + 子指标区域
+  // 子指标区域动态分配：MACD占14%，KDJ/RSI合并占13%
+  const mainHeight = 55;
+  const volHeight = 12;
+  const gap = 2; // 子图之间的间隙百分比
+  
+  let macdHeight = 0, kdjRsiHeight = 0;
+  if(subCount === 1) {
+    macdHeight = hasMacd ? 18 : 0;
+    kdjRsiHeight = (hasKdj||hasRsi) ? 18 : 0;
+  } else if(subCount === 2) {
+    macdHeight = 14;
+    kdjRsiHeight = 13;
+  }
+  
+  // 计算各区域位置 (从上到下)
+  let currentTop = 4; // 顶部留白
+  const grids=[
+    {l:'6%',r:'2%',t:currentTop+'%',h:mainHeight+'%',gi:0}  // 主图: K线+MA
+  ];
+  currentTop += mainHeight + gap;
+  
+  grids.push({l:'6%',r:'2%',t:currentTop+'%',h:volHeight+'%',gi:1}); // 成交量
+  currentTop += volHeight + gap;
+  
+  let gi = 2;
+  if(hasMacd){
+    grids.push({l:'6%',r:'2%',t:currentTop+'%',h:macdHeight+'%',gi:gi++});
+    currentTop += macdHeight + gap;
+  }
+  if(hasKdj||hasRsi){
+    // KDJ和RSI合并到一个grid，左右分栏
+    grids.push({l:'6%',r:'2%',t:currentTop+'%',h:kdjRsiHeight+'%',gi:gi++});
+  }
 
   // xAxis: all share the same dates
   const xAxes=grids.map((g,i)=>({
     type:'category',data:dates,gridIndex:i,
     axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},
-    axisLabel:{show:i===0,color:C.txt,fontSize:10},splitLine:{show:false},boundaryGap:false,
+    axisLabel:{show:i===0,color:C.txt,fontSize:9,interval:'auto',rotate:0},splitLine:{show:false},boundaryGap:false,
   }));
 
   // yAxis
   const yAxes=grids.map((g,i)=>{
-    if(i===0)return{type:'value',gridIndex:i,scale:true,position:'left',
-      axisLine:{show:false},axisLabel:{color:C.txt,fontSize:10},
-      splitLine:{lineStyle:{color:C.grid+'44'}}};
-    if(i===1)return{type:'value',gridIndex:i,scale:true,axisLine:{show:false},
-      axisLabel:{show:false},splitLine:{show:false}};
-    return{type:'value',gridIndex:i,scale:true,position:'left',
-      axisLine:{show:false},axisLabel:{color:C.txt,fontSize:9},
-      splitLine:{lineStyle:{color:C.grid+'33'}}};
+    const isMain = i===0;
+    const isVol = i===1;
+    const isMacd = hasMacd && i===2;
+    const isKdjRsi = (hasKdj||hasRsi) && ((hasMacd&&i===3) || (!hasMacd&&i===2));
+    
+    if(isMain){
+      return{type:'value',gridIndex:i,scale:true,position:'right',
+        axisLine:{show:false},axisLabel:{color:C.txt,fontSize:10,formatter:'{value}'},
+        splitLine:{show:true,lineStyle:{color:C.grid+'22',type:'dashed'}}};
+    }
+    if(isVol){
+      return{type:'value',gridIndex:i,scale:true,position:'right',
+        axisLine:{show:false},axisLabel:{show:false},splitLine:{show:false}};
+    }
+    if(isMacd){
+      return{type:'value',gridIndex:i,scale:true,position:'right',
+        axisLine:{show:false},axisLabel:{color:C.txt,fontSize:9,formatter:'{value}'},
+        splitLine:{show:true,lineStyle:{color:C.grid+'15',type:'dashed'}},
+        axisTick:{show:true,lineStyle:{color:C.grid}}};
+    }
+    // KDJ/RSI合并区域
+    return{type:'value',gridIndex:i,scale:true,position:'right',
+      axisLine:{show:false},axisLabel:{color:C.txt,fontSize:9,formatter:'{value}'},
+      splitLine:{show:true,lineStyle:{color:C.grid+'15',type:'dashed'}},
+      min:0,max:100};
   });
 
   // Annotations as markPoint
@@ -628,7 +756,7 @@ function buildOpt(){
       const vals=sma(d,p);
       series.push({name:`MA${p}`,type:'line',data:vals,
         xAxisIndex:0,yAxisIndex:0,smooth:false,symbol:'none',
-        lineStyle:{width:S.maLW,color:MACOLORS[i%MACOLORS.length]},
+        lineStyle:{width:S.maLW,color:MACOLORS[i%MACOLORS.length],opacity:0.9},
         z:10,silent:true,animation:false});
     });
   }
@@ -636,52 +764,71 @@ function buildOpt(){
   // Volume bars
   series.push({name:'成交量',type:'bar',data:vols,
     xAxisIndex:1,yAxisIndex:1,
-    barMaxWidth:6,
+    barMaxWidth:4,
     itemStyle:{color:upFlg.map(u=>u?C.up+'99':C.dn+'99')},animation:false});
 
-  // MACD
+  // MACD - 使用柱状图显示
   if(S.macdOn){
     const {dif,dea,bar}=macd(d,S.macdF,S.macdS,S.macdD);
     const giMacd=2;
-    series.push({name:'MACD',type:'line',data:bar,
-      xAxisIndex:giMacd,yAxisIndex:giMacd,smooth:false,symbol:'none',
-      lineStyle:{width:1,color:C.yl},z:5,silent:true,animation:false});
+    
+    // MACD柱状图 - 红绿区分
+    series.push({name:'MACD柱',type:'bar',data:bar,
+      xAxisIndex:giMacd,yAxisIndex:giMacd,
+      barMaxWidth:3,
+      itemStyle:{color:(params)=>{
+        const v = bar[params.dataIndex];
+        if(v===null) return C.grid+'33';
+        const prev = params.dataIndex>0 ? bar[params.dataIndex-1] : 0;
+        if(v>=0) return v>=prev ? C.up : C.up+'99';
+        return v<=prev ? C.dn : C.dn+'99';
+      }},z:4,silent:true,animation:false});
+    
     series.push({name:'DIF',type:'line',data:dif,
       xAxisIndex:giMacd,yAxisIndex:giMacd,smooth:false,symbol:'none',
-      lineStyle:{width:1,color:'#4dabf7'},z:5,silent:true,animation:false});
+      lineStyle:{width:1.5,color:'#4dabf7'},z:5,silent:true,animation:false});
     series.push({name:'DEA',type:'line',data:dea,
       xAxisIndex:giMacd,yAxisIndex:giMacd,smooth:false,symbol:'none',
-      lineStyle:{width:1.2,color:C.yl},z:5,silent:true,animation:false});
+      lineStyle:{width:1.5,color:C.yl},z:5,silent:true,animation:false});
   }
 
-  // KDJ
+  // KDJ 和 RSI 合并显示
   if(S.kdjOn){
     const {K,D,J}=kdj(d,S.kdjN,S.kdjM1,S.kdjM2);
-    const giKdj=2+(S.macdOn?1:0);
-    series.push({name:'K',type:'line',data:K,xAxisIndex:giKdj,yAxisIndex:giKdj,
-      smooth:false,symbol:'none',lineStyle:{width:1.2,color:'#ff6b6b'},z:5,silent:true,animation:false});
-    series.push({name:'D',type:'line',data:D,xAxisIndex:giKdj,yAxisIndex:giKdj,
-      smooth:false,symbol:'none',lineStyle:{width:1.2,color:'#4dabf7'},z:5,silent:true,animation:false});
-    series.push({name:'J',type:'line',data:J,xAxisIndex:giKdj,yAxisIndex:giKdj,
-      smooth:false,symbol:'none',lineStyle:{width:1,color:'#da77f2',type:'dashed'},z:5,silent:true,animation:false});
+    const giKdjRsi=2+(S.macdOn?1:0);
+    // KDJ 显示在 0-100 范围
+    series.push({name:'K',type:'line',data:K,xAxisIndex:giKdjRsi,yAxisIndex:giKdjRsi,
+      smooth:false,symbol:'none',lineStyle:{width:1.5,color:'#ff6b6b'},z:5,silent:true,animation:false});
+    series.push({name:'D',type:'line',data:D,xAxisIndex:giKdjRsi,yAxisIndex:giKdjRsi,
+      smooth:false,symbol:'none',lineStyle:{width:1.5,color:'#4dabf7'},z:5,silent:true,animation:false});
+    series.push({name:'J',type:'line',data:J,xAxisIndex:giKdjRsi,yAxisIndex:giKdjRsi,
+      smooth:false,symbol:'none',lineStyle:{width:1.2,color:'#da77f2',type:'dashed'},z:5,silent:true,animation:false});
+    
+    // KDJ 超买超卖线 (80/20)
+    series.push({name:'KDJ-80',type:'line',data:d.map(()=>80),
+      xAxisIndex:giKdjRsi,yAxisIndex:giKdjRsi,smooth:false,symbol:'none',
+      lineStyle:{width:1,color:C.yl+'40',type:'dashed'},z:3,silent:true,animation:false});
+    series.push({name:'KDJ-20',type:'line',data:d.map(()=>20),
+      xAxisIndex:giKdjRsi,yAxisIndex:giKdjRsi,smooth:false,symbol:'none',
+      lineStyle:{width:1,color:C.yl+'40',type:'dashed'},z:3,silent:true,animation:false});
   }
-
-  // RSI
-  if(S.rsiOn){
-    const giRsi=2+(S.macdOn?1:0)+(S.kdjOn?1:0);
+  
+  if(S.rsiOn && !S.kdjOn){
+    // 只有RSI时单独显示
+    const giRsi=2+(S.macdOn?1:0);
     S.rsiP.forEach((p,i)=>{
       const vals=rsi(d,p);
       series.push({name:`RSI${p}`,type:'line',data:vals,xAxisIndex:giRsi,yAxisIndex:giRsi,
-        smooth:false,symbol:'none',lineStyle:{width:1.4,color:MACOLORS[i%MACOLORS.length]},
+        smooth:false,symbol:'none',lineStyle:{width:1.5,color:MACOLORS[i%MACOLORS.length]},
         z:5,silent:true,animation:false});
     });
     // OB/OS reference lines
     series.push({name:'RSI-OB',type:'line',data:d.map(()=>S.rsiOB),
       xAxisIndex:giRsi,yAxisIndex:giRsi,smooth:false,symbol:'none',
-      lineStyle:{width:1,color:C.yl+'55',type:'dashed'},z:4,silent:true,animation:false});
+      lineStyle:{width:1,color:C.yl+'40',type:'dashed'},z:3,silent:true,animation:false});
     series.push({name:'RSI-OS',type:'line',data:d.map(()=>S.rsiOS),
       xAxisIndex:giRsi,yAxisIndex:giRsi,smooth:false,symbol:'none',
-      lineStyle:{width:1,color:C.yl+'55',type:'dashed'},z:4,silent:true,animation:false});
+      lineStyle:{width:1,color:C.yl+'40',type:'dashed'},z:3,silent:true,animation:false});
   }
 
   return {
@@ -716,18 +863,18 @@ function buildOpt(){
           if(mav.length) h+='<br/>'+mav.join('&nbsp;');
         }
         // MACD
-        const macdP=params.find(p=>p.seriesName==='MACD');
+        const macdBar=params.find(p=>p.seriesName==='MACD柱');
         const difP=params.find(p=>p.seriesName==='DIF');
         const deaP=params.find(p=>p.seriesName==='DEA');
         if(difP&&difP.value!==null&&difP.value!==undefined){
-          h+=`<br/><span style="color:#4dabf7">DIF:${difP.value}</span>`;
+          h+=`<br/><span style="color:#4dabf7">DIF:${difP.value.toFixed(3)}</span>`;
         }
         if(deaP&&deaP.value!==null&&deaP.value!==undefined){
-          h+=`&nbsp;<span style="color:${C.yl}">DEA:${deaP.value}</span>`;
+          h+=`&nbsp;<span style="color:${C.yl}">DEA:${deaP.value.toFixed(3)}</span>`;
         }
-        if(macdP&&macdP.value!==null&&macdP.value!==undefined){
-          const mc=macdP.value>=0?C.up:C.dn;
-          h+=`&nbsp;<span style="color:${mc}">MACD:${macdP.value}</span>`;
+        if(macdBar&&macdBar.value!==null&&macdBar.value!==undefined){
+          const mc=macdBar.value>=0?C.up:C.dn;
+          h+=`&nbsp;<span style="color:${mc}">BAR:${macdBar.value.toFixed(3)}</span>`;
         }
         // KDJ
         const kP=params.find(p=>p.seriesName==='K');
@@ -763,13 +910,397 @@ function buildOpt(){
   };
 }
 
+// ── 指标分析函数 ──
+function analyzeMA(data, maP) {
+  if (!data.length) return null;
+  const last = data[data.length - 1];
+  const close = last.close;
+  
+  // 计算各 MA 值
+  const maVals = {};
+  maP.forEach(p => {
+    const vals = sma(data, p);
+    const valid = vals.filter(v => v !== null);
+    if (valid.length) maVals[p] = valid[valid.length - 1];
+  });
+  
+  // 判断信号
+  let signal = 'hold';
+  let reason = '';
+  
+  // MA5 > MA10 > MA20 为多头排列（买入信号）
+  if (maVals[5] && maVals[10] && maVals[20]) {
+    if (maVals[5] > maVals[10] && maVals[10] > maVals[20]) {
+      signal = 'buy';
+      reason = 'MA 多头排列';
+    } else if (maVals[5] < maVals[10] && maVals[10] < maVals[20]) {
+      signal = 'sell';
+      reason = 'MA 空头排列';
+    }
+  }
+  
+  // 价格在所有 MA 之上为强势
+  const aboveAll = Object.values(maVals).every(v => close > v);
+  const belowAll = Object.values(maVals).every(v => close < v);
+  
+  if (aboveAll && signal !== 'sell') {
+    signal = 'buy';
+    reason = '价格突破所有均线';
+  } else if (belowAll && signal !== 'buy') {
+    signal = 'sell';
+    reason = '价格跌破所有均线';
+  }
+  
+  return {
+    signal,
+    reason,
+    maVals,
+    close,
+    aboveAll,
+    belowAll,
+  };
+}
+
+function analyzeMACD(data, fast, slow, signal) {
+  if (!data.length) return null;
+  const { dif, dea, bar } = macd(data, fast, slow, signal);
+  
+  // 找最后一个有效值
+  let lastDif = null, lastDea = null, lastBar = null;
+  for (let i = dif.length - 1; i >= 0; i--) {
+    if (dif[i] !== null && lastDif === null) {
+      lastDif = dif[i];
+      lastDea = dea[i];
+      lastBar = bar[i];
+      break;
+    }
+  }
+  
+  if (lastDif === null) return null;
+  
+  // 判断信号
+  let signal = 'hold';
+  let reason = '';
+  
+  // DIF 上穿 DEA 为金叉（买入）
+  // DIF 下穿 DEA 为死叉（卖出）
+  let goldenCross = false, deadCross = false;
+  for (let i = dif.length - 2; i >= 0; i--) {
+    if (dif[i] !== null && dea[i] !== null) {
+      if (dif[i] < dea[i] && lastDif > lastDea) goldenCross = true;
+      if (dif[i] > dea[i] && lastDif < lastDea) deadCross = true;
+      break;
+    }
+  }
+  
+  if (goldenCross) {
+    signal = 'buy';
+    reason = 'MACD 金叉';
+  } else if (deadCross) {
+    signal = 'sell';
+    reason = 'MACD 死叉';
+  } else if (lastDif > lastDea && lastBar > 0) {
+    signal = 'buy';
+    reason = 'DIF > DEA，柱状图为正';
+  } else if (lastDif < lastDea && lastBar < 0) {
+    signal = 'sell';
+    reason = 'DIF < DEA，柱状图为负';
+  }
+  
+  return {
+    signal,
+    reason,
+    dif: lastDif,
+    dea: lastDea,
+    bar: lastBar,
+  };
+}
+
+function analyzeKDJ(data, n, m1, m2) {
+  if (!data.length) return null;
+  const { K, D, J } = kdj(data, n, m1, m2);
+  
+  // 找最后一个有效值
+  let lastK = null, lastD = null, lastJ = null;
+  for (let i = K.length - 1; i >= 0; i--) {
+    if (K[i] !== null && lastK === null) {
+      lastK = K[i];
+      lastD = D[i];
+      lastJ = J[i];
+      break;
+    }
+  }
+  
+  if (lastK === null) return null;
+  
+  // 判断信号
+  let signal = 'hold';
+  let reason = '';
+  
+  // K 上穿 D 为买入信号
+  // K 下穿 D 为卖出信号
+  let crossUp = false, crossDown = false;
+  for (let i = K.length - 2; i >= 0; i--) {
+    if (K[i] !== null && D[i] !== null) {
+      if (K[i] < D[i] && lastK > lastD) crossUp = true;
+      if (K[i] > D[i] && lastK < lastD) crossDown = true;
+      break;
+    }
+  }
+  
+  if (crossUp) {
+    signal = 'buy';
+    reason = 'K 上穿 D（金叉）';
+  } else if (crossDown) {
+    signal = 'sell';
+    reason = 'K 下穿 D（死叉）';
+  } else if (lastK < 20 && lastD < 20) {
+    signal = 'buy';
+    reason = 'KDJ 超卖区域';
+  } else if (lastK > 80 && lastD > 80) {
+    signal = 'sell';
+    reason = 'KDJ 超买区域';
+  }
+  
+  return {
+    signal,
+    reason,
+    K: lastK,
+    D: lastD,
+    J: lastJ,
+  };
+}
+
+function analyzeRSI(data, periods) {
+  if (!data.length) return null;
+  
+  const rsiVals = {};
+  periods.forEach(p => {
+    const vals = rsi(data, p);
+    const valid = vals.filter(v => v !== null);
+    if (valid.length) rsiVals[p] = valid[valid.length - 1];
+  });
+  
+  // 判断信号
+  let signal = 'hold';
+  let reason = '';
+  
+  // RSI < 30 为超卖（买入）
+  // RSI > 70 为超买（卖出）
+  const hasOversold = Object.values(rsiVals).some(v => v < 30);
+  const hasOverbought = Object.values(rsiVals).some(v => v > 70);
+  
+  if (hasOversold) {
+    signal = 'buy';
+    reason = 'RSI 超卖';
+  } else if (hasOverbought) {
+    signal = 'sell';
+    reason = 'RSI 超买';
+  }
+  
+  return {
+    signal,
+    reason,
+    rsiVals,
+  };
+}
+
+function updateAnalysisPanel() {
+  const container = document.getElementById('analysis-content');
+  if (!container || !S.filtered.length) {
+    if (container) container.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:8px 0">暂无数据</div>';
+    return;
+  }
+  
+  let html = '';
+  let totalScore = 0;
+  let signalCount = 0;
+  
+  // MA 分析
+  if (S.maOn && S.maP.length) {
+    const analysis = analyzeMA(S.filtered, S.maP);
+    if (analysis) {
+      const signalClass = analysis.signal;
+      const signalText = analysis.signal === 'buy' ? '买入' : analysis.signal === 'sell' ? '卖出' : '观望';
+      
+      html += `<div class="analysis-card">
+        <div class="ac-hd">
+          <span class="ac-name">MA 移动均线</span>
+          <span class="ac-signal ${signalClass}">${signalText}</span>
+        </div>
+        <div class="ac-detail">${analysis.reason}</div>
+        <div class="ac-row">
+          <span style="color:var(--muted)">收盘价:</span>
+          <span class="ac-val ${analysis.close >= (analysis.maVals[5]||0) ? 'up' : 'dn'}">${analysis.close.toFixed(2)}</span>
+        </div>`;
+      
+      S.maP.forEach((p, i) => {
+        if (analysis.maVals[p]) {
+          const above = analysis.close > analysis.maVals[p];
+          html += `<div class="ac-row">
+            <span style="color:var(--muted)">MA${p}:</span>
+            <span class="ac-val ${above ? 'up' : 'dn'}">${analysis.maVals[p].toFixed(2)}</span>
+          </div>`;
+        }
+      });
+      
+      html += `</div>`;
+      
+      // 评分：买入 +2，卖出 -2，观望 0
+      totalScore += analysis.signal === 'buy' ? 2 : analysis.signal === 'sell' ? -2 : 0;
+      signalCount++;
+    }
+  }
+  
+  // MACD 分析
+  if (S.macdOn) {
+    const analysis = analyzeMACD(S.filtered, S.macdF, S.macdS, S.macdD);
+    if (analysis) {
+      const signalClass = analysis.signal;
+      const signalText = analysis.signal === 'buy' ? '买入' : analysis.signal === 'sell' ? '卖出' : '观望';
+      
+      html += `<div class="analysis-card">
+        <div class="ac-hd">
+          <span class="ac-name">MACD</span>
+          <span class="ac-signal ${signalClass}">${signalText}</span>
+        </div>
+        <div class="ac-detail">${analysis.reason}</div>
+        <div class="ac-row">
+          <span style="color:var(--muted)">DIF:</span>
+          <span class="ac-val ${analysis.dif >= 0 ? 'up' : 'dn'}">${analysis.dif.toFixed(4)}</span>
+        </div>
+        <div class="ac-row">
+          <span style="color:var(--muted)">DEA:</span>
+          <span class="ac-val ${analysis.dea >= 0 ? 'up' : 'dn'}">${analysis.dea.toFixed(4)}</span>
+        </div>
+        <div class="ac-row">
+          <span style="color:var(--muted)">BAR:</span>
+          <span class="ac-val ${analysis.bar >= 0 ? 'up' : 'dn'}">${analysis.bar.toFixed(4)}</span>
+        </div>
+      </div>`;
+      
+      totalScore += analysis.signal === 'buy' ? 2 : analysis.signal === 'sell' ? -2 : 0;
+      signalCount++;
+    }
+  }
+  
+  // KDJ 分析
+  if (S.kdjOn) {
+    const analysis = analyzeKDJ(S.filtered, S.kdjN, S.kdjM1, S.kdjM2);
+    if (analysis) {
+      const signalClass = analysis.signal;
+      const signalText = analysis.signal === 'buy' ? '买入' : analysis.signal === 'sell' ? '卖出' : '观望';
+      
+      html += `<div class="analysis-card">
+        <div class="ac-hd">
+          <span class="ac-name">KDJ</span>
+          <span class="ac-signal ${signalClass}">${signalText}</span>
+        </div>
+        <div class="ac-detail">${analysis.reason}</div>
+        <div class="ac-row">
+          <span style="color:var(--muted)">K:</span>
+          <span class="ac-val">${analysis.K.toFixed(2)}</span>
+        </div>
+        <div class="ac-row">
+          <span style="color:var(--muted)">D:</span>
+          <span class="ac-val">${analysis.D.toFixed(2)}</span>
+        </div>
+        <div class="ac-row">
+          <span style="color:var(--muted)">J:</span>
+          <span class="ac-val">${analysis.J.toFixed(2)}</span>
+        </div>
+      </div>`;
+      
+      totalScore += analysis.signal === 'buy' ? 2 : analysis.signal === 'sell' ? -2 : 0;
+      signalCount++;
+    }
+  }
+  
+  // RSI 分析
+  if (S.rsiOn && S.rsiP.length) {
+    const analysis = analyzeRSI(S.filtered, S.rsiP);
+    if (analysis) {
+      const signalClass = analysis.signal;
+      const signalText = analysis.signal === 'buy' ? '买入' : analysis.signal === 'sell' ? '卖出' : '观望';
+      
+      html += `<div class="analysis-card">
+        <div class="ac-hd">
+          <span class="ac-name">RSI</span>
+          <span class="ac-signal ${signalClass}">${signalText}</span>
+        </div>
+        <div class="ac-detail">${analysis.reason}</div>`;
+      
+      S.rsiP.forEach(p => {
+        if (analysis.rsiVals[p]) {
+          const val = analysis.rsiVals[p];
+          let level = '';
+          if (val < 30) level = '超卖';
+          else if (val > 70) level = '超买';
+          else level = '中性';
+          
+          html += `<div class="ac-row">
+            <span style="color:var(--muted)">RSI${p}:</span>
+            <span class="ac-val">${val.toFixed(2)} (${level})</span>
+          </div>`;
+        }
+      });
+      
+      html += `</div>`;
+      
+      totalScore += analysis.signal === 'buy' ? 2 : analysis.signal === 'sell' ? -2 : 0;
+      signalCount++;
+    }
+  }
+  
+  // 总结
+  if (signalCount > 0) {
+    const avgScore = totalScore / signalCount;
+    let summaryText = '';
+    let summaryColor = '';
+    
+    if (avgScore > 1) {
+      summaryText = '综合信号：强烈买入';
+      summaryColor = 'var(--green)';
+    } else if (avgScore > 0) {
+      summaryText = '综合信号：偏买入';
+      summaryColor = 'var(--green)';
+    } else if (avgScore < -1) {
+      summaryText = '综合信号：强烈卖出';
+      summaryColor = 'var(--red)';
+    } else if (avgScore < 0) {
+      summaryText = '综合信号：偏卖出';
+      summaryColor = 'var(--red)';
+    } else {
+      summaryText = '综合信号：观望';
+      summaryColor = 'var(--yellow)';
+    }
+    
+    const scorePercent = Math.max(0, Math.min(100, (avgScore + 2) / 4 * 100));
+    const scoreColor = avgScore > 0 ? 'var(--green)' : avgScore < 0 ? 'var(--red)' : 'var(--yellow)';
+    
+    html += `<div class="analysis-summary">
+      <div class="as-hd">综合建议</div>
+      <div class="as-body">${summaryText}</div>
+      <div class="as-score">
+        <div class="score-bar"><div class="score-fill" style="width:${scorePercent}%;background:${scoreColor}"></div></div>
+        <span class="score-num" style="color:${summaryColor}">${avgScore.toFixed(1)}</span>
+      </div>
+    </div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
 function redraw(){
   if(!chart||!S.filtered.length)return;
   chart.setOption(buildOpt(),{notMerge:true,lazyUpdate:false});
+  updateLegend();
+  updateAnalysisPanel();
 }
 
 // ── Data loading ──
 async function loadData(key){
+  // 优先从内存缓存
   if(MEM[key]){
     const rows=[...MEM[key]];
     rows.sort((a,b)=>a.date.localeCompare(b.date));
@@ -777,28 +1308,28 @@ async function loadData(key){
     applyRange(); updateSI(); redraw();
     return;
   }
-  const path=STOCK_PATHS[key];
-  if(!path){toast('请先选择股票');return;}
-  showLoad(true);
-  try{
-    const url='file:///'+path.replace(/\\/g,'/');
-    const r=await fetch(url);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const text=await r.text();
-    const rows=csv(text);
-    if(!rows.length){toast('数据为空');showLoad(false);return;}
-    MEM[key]=rows;
+  // 尝试内置数据（SAMPLE_DATA 由 sample_data.js 注入）
+  const sampleKey = SAMPLE_KEY_MAP[key];
+  if(sampleKey && typeof SAMPLE_DATA !== 'undefined' && SAMPLE_DATA[sampleKey]){
+    const sd = SAMPLE_DATA[sampleKey];
+    const rows = sd.data.map(d => ({
+      date:   d.date,
+      open:   d.open  || 0,
+      high:   d.high  || 0,
+      low:    d.low   || 0,
+      close:  d.close || 0,
+      volume: d.volume|| 0,
+      name:   sd.name,
+    }));
+    MEM[key] = rows;
     rows.sort((a,b)=>a.date.localeCompare(b.date));
-    S.raw=rows;S.filtered=rows;S.anns=[];
-    applyRange();updateSI();redraw();
-    const sel=document.getElementById('sel-stock');
-    toast(`已加载 ${rows.length} 条数据`);
-    showLoad(false);
-  }catch(e){
-    console.error(e);
-    toast('无法加载（请使用浏览器打开，或拖入CSV）');
-    showLoad(false);
+    S.raw=rows; S.filtered=rows; S.anns=[];
+    applyRange(); updateSI(); redraw();
+    toast(`${sd.name}：${rows.length} 条数据（${rows[0].date} ~ ${rows[rows.length-1].date}）`);
+    return;
   }
+  // 兜底：拖入 CSV
+  toast('请选择预设股票或拖入 CSV 文件');
 }
 
 function applyRange(){
@@ -820,8 +1351,8 @@ function updateSI(){
   const em=document.getElementById('si-meta');
   if(!d.length){el.textContent='—';ep.textContent='—';ec.textContent='—';em.textContent='0 条数据';return;}
   const opt=document.getElementById('sel-stock');
-  el.textContent=opt.selectedIndex>0?opt.text:key=>STOCK_FILES[S.currentKey]?.label||'—';
-  el.textContent=STOCK_FILES[S.currentKey]?.label||'—';
+  el.textContent=opt.selectedIndex>0?opt.text:(STOCK_PRESETS[S.currentKey]?.label||'—');
+  el.textContent=STOCK_PRESETS[S.currentKey]?.label||'—';
   const last=d[d.length-1],first=d[0];
   ep.textContent=last.close;
   const up=last.close>=first.close;
@@ -846,6 +1377,32 @@ function toast(msg){
 function syncSl(nId,sId){
   const n=document.getElementById(nId),s=document.getElementById(sId);
   if(n&&s){s.addEventListener('input',()=>{n.value=s.value;});n.addEventListener('change',()=>{s.value=n.value;});}
+}
+
+// ── Chart Legend ──
+function updateLegend(){
+  // MA
+  const legMa=document.getElementById('leg-ma');
+  const legMaItems=document.getElementById('leg-ma-items');
+  if(S.maOn&&S.maP.length>0){
+    legMa.style.display='flex';
+    legMaItems.innerHTML=S.maP.map((p,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${MACOLORS[i%MACOLORS.length]}"></span><span class="leg-txt">MA${p}</span></span>`).join('');
+  }else{
+    legMa.style.display='none';
+  }
+  // MACD
+  document.getElementById('leg-macd').style.display=S.macdOn?'flex':'none';
+  // KDJ
+  document.getElementById('leg-kdj').style.display=S.kdjOn?'flex':'none';
+  // RSI
+  const legRsi=document.getElementById('leg-rsi');
+  const legRsiItems=document.getElementById('leg-rsi-items');
+  if(S.rsiOn&&S.rsiP.length>0&&!S.kdjOn){
+    legRsi.style.display='flex';
+    legRsiItems.innerHTML=S.rsiP.map((p,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${MACOLORS[i%MACOLORS.length]}"></span><span class="leg-txt">RSI${p}</span></span>`).join('');
+  }else{
+    legRsi.style.display='none';
+  }
 }
 
 // ── Presets ──
@@ -931,8 +1488,8 @@ function resetParams(){
   Object.assign(S,{
     maOn:true,maP:[5,10,20,60],maLW:1.5,
     macdOn:true,macdBarOn:true,macdF:12,macdS:26,macdD:9,
-    kdjOn:true,kdjN:9,kdjM1:3,kdjM2:3,
-    rsiOn:true,rsiP:[6,12,24],rsiOB:70,rsiOS:30,
+    kdjOn:false,kdjN:9,kdjM1:3,kdjM2:3,
+    rsiOn:false,rsiP:[6,12,24],rsiOB:70,rsiOS:30,
   });
   syncUI();redraw();toast('参数已重置');
 }
