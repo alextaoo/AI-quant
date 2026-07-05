@@ -2,7 +2,7 @@
 
 > 技术指标可视化工具 — 支持 MA / MACD / KDJ / RSI 实时计算
 
-**👉 在线访问：https://alextaoo.github.io/AI-quant/**
+**👉 在线访问：https://alextaoo.github.io/AI-quant/master/**
 
 ---
 
