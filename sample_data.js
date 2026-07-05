@@ -1,6 +1,6 @@
 const SAMPLE_DATA = {
   "stocks": {
-    "sh_688981": {
+    "688981.SH": {
       "name": "中微公司",
       "data": [
         {
@@ -4005,7 +4005,7 @@ const SAMPLE_DATA = {
         }
       ]
     },
-    "sz_002594": {
+    "002594.SZ": {
       "name": "比亚迪",
       "data": [
         {
@@ -8010,7 +8010,7 @@ const SAMPLE_DATA = {
         }
       ]
     },
-    "sh_600900": {
+    "600900.SH": {
       "name": "长江电力",
       "data": [
         {
